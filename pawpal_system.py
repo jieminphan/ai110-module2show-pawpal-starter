@@ -295,87 +295,157 @@ __all__ = [
 
 # --- Pure Python agent-mode classes (no SQLAlchemy) ---
 class Task:
-		def __init__(self, description: str, time: datetime, frequency: str = "once", completed: bool = False):
-			"""Initialize a new task."""
-			self.description = description
-			self.time = time
-			self.frequency = frequency
-			self.completed = completed
+	def __init__(self, description: str, time: datetime, frequency: str = "once", completed: bool = False):
+		"""Initialize a new task."""
+		self.description = description
+		self.time = time
+		self.frequency = frequency
+		self.completed = completed
 
-		def mark_complete(self):
-			"""Mark this task as complete."""
-			self.completed = True
+	def mark_complete(self):
+		"""Mark this task as complete."""
+		self.completed = True
 
-		def __repr__(self):
-			"""Return a string representation of the task."""
-			return f"<Task desc={self.description!r} time={self.time} freq={self.frequency} completed={self.completed}>"
+	def __repr__(self):
+		"""Return a string representation of the task."""
+		return f"<Task desc={self.description!r} time={self.time} freq={self.frequency} completed={self.completed}>"
 
 
 class Pet:
-		def __init__(self, name, species=None, breed=None, birth_date=None, notes=None, tasks=None):
-			"""Initialize a new pet."""
-			self.name = name
-			self.species = species
-			self.breed = breed
-			self.birth_date = birth_date
-			self.notes = notes
-			self.tasks = tasks if tasks is not None else []
+	def __init__(self, name, species=None, breed=None, birth_date=None, notes=None, tasks=None):
+		"""Initialize a new pet."""
+		self.name = name
+		self.species = species
+		self.breed = breed
+		self.birth_date = birth_date
+		self.notes = notes
+		self.tasks = tasks if tasks is not None else []
 
-		def add_task(self, task: Task):
-			"""Add a task to this pet."""
-			self.tasks.append(task)
+	def add_task(self, task: Task):
+		"""Add a task to this pet."""
+		self.tasks.append(task)
 
-		def get_tasks(self):
-			"""Get all tasks for this pet."""
-			return self.tasks
+	def get_tasks(self):
+		"""Get all tasks for this pet."""
+		return self.tasks
 
-		def __repr__(self):
-			"""Return a string representation of the pet."""
-			return f"<Pet name={self.name!r} species={self.species} tasks={len(self.tasks)} >"
+	def __repr__(self):
+		"""Return a string representation of the pet."""
+		return f"<Pet name={self.name!r} species={self.species} tasks={len(self.tasks)} >"
 
 
 class Owner:
-		def __init__(self, name, email=None, phone=None, pets=None):
-			"""Initialize a new owner."""
-			self.name = name
-			self.email = email
-			self.phone = phone
-			self.pets = pets if pets is not None else []
+	def __init__(self, name, email=None, phone=None, pets=None):
+		"""Initialize a new owner."""
+		self.name = name
+		self.email = email
+		self.phone = phone
+		self.pets = pets if pets is not None else []
 
-		def add_pet(self, pet: Pet):
-			"""Add a pet to this owner."""
-			self.pets.append(pet)
+	def add_pet(self, pet: Pet):
+		"""Add a pet to this owner."""
+		self.pets.append(pet)
 
-		def get_all_tasks(self):
-			"""Get all tasks for all pets owned by this owner."""
-			all_tasks = []
-			for pet in self.pets:
-				all_tasks.extend(getattr(pet, 'tasks', []))
-			return all_tasks
+	def get_all_tasks(self):
+		"""Get all tasks for all pets owned by this owner."""
+		all_tasks = []
+		for pet in self.pets:
+			all_tasks.extend(getattr(pet, 'tasks', []))
+		return all_tasks
 
-		def __repr__(self):
-			"""Return a string representation of the owner."""
-			return f"<Owner name={self.name!r} pets={len(self.pets)} >"
+	def __repr__(self):
+		"""Return a string representation of the owner."""
+		return f"<Owner name={self.name!r} pets={len(self.pets)} >"
 
 
 class Scheduler:
-		@staticmethod
-		def get_all_tasks_for_owner(owner: Owner):
-			"""Get all tasks for a given owner."""
-			return owner.get_all_tasks()
+	@staticmethod
+	def warn_on_conflicts(tasks: list):
+		"""
+		Lightweight conflict detection: returns a warning message if any two tasks are scheduled at the same time.
+		Does not raise errors or crash the program.
+		Returns None if no conflicts, or a warning string if conflicts exist.
+		"""
+		conflicts = Scheduler.detect_conflicts(tasks)
+		if conflicts:
+			return f"Warning: {len(conflicts)} scheduling conflict(s) detected. Some tasks overlap in time."
+		return None
 
-		@staticmethod
-		def get_tasks_for_pet(pet: Pet):
-			"""Get all tasks for a given pet."""
-			return pet.get_tasks()
+	@staticmethod
+	def detect_conflicts(tasks: list):
+		"""
+		Efficiently detect if any two tasks (for the same or different pets) are scheduled at the same time.
+		Groups tasks by their scheduled time, then checks for conflicts only within each group.
+		Returns a list of tuples: (task1, task2) for each conflict found.
+		"""
+		from collections import defaultdict
+		# Group tasks by their scheduled time
+		time_map = defaultdict(list)
+		for task in tasks:
+			time_map[task.time].append(task)
 
-		@staticmethod
-		def organize_tasks_by_time(tasks: list):
-			"""Organize tasks by their scheduled time."""
-			return sorted(tasks, key=lambda t: t.time)
+		conflicts = []
+		# For each group of tasks at the same time, add all unique pairs as conflicts
+		for task_list in time_map.values():
+			if len(task_list) > 1:
+				# Compare each pair only once
+				for i in range(len(task_list)):
+					for j in range(i + 1, len(task_list)):
+						# Add the conflicting pair
+						conflicts.append((task_list[i], task_list[j]))
+		return conflicts
 
-		@staticmethod
-		def mark_task_complete(task: Task):
-			"""Mark a given task as complete."""
-			task.mark_complete()
+	@staticmethod
+	def filter_tasks(tasks: list, completed: bool = None, pet_name: str = None):
+		"""
+		Filter tasks by completion status and/or pet name.
+		:param tasks: List of Task objects (optionally with pet attribute or from a single pet)
+		:param completed: True for completed, False for incomplete, None for all
+		:param pet_name: Filter by pet name if provided
+		:return: Filtered list of tasks
+		"""
+		filtered = tasks
+		if completed is not None:
+			filtered = [t for t in filtered if getattr(t, 'completed', False) == completed]
+		if pet_name is not None:
+			filtered = [t for t in filtered if hasattr(t, 'pet') and getattr(t.pet, 'name', None) == pet_name]
+		return filtered
+
+	@staticmethod
+	def get_all_tasks_for_owner(owner: Owner):
+		"""Get all tasks for a given owner."""
+		return owner.get_all_tasks()
+
+	@staticmethod
+	def get_tasks_for_pet(pet: Pet):
+		"""Get all tasks for a given pet."""
+		return pet.get_tasks()
+
+	@staticmethod
+	def organize_tasks_by_time(tasks: list):
+		"""Organize tasks by their scheduled time."""
+		return sorted(tasks, key=lambda t: t.time)
+
+	@staticmethod
+	def mark_task_complete(task: Task, pet: 'Pet' = None):
+		"""
+		Mark a given task as complete. If the task is 'daily' or 'weekly', create the next occurrence automatically.
+		:param task: The Task to mark complete
+		:param pet: The Pet to which the task belongs (required for recurring tasks)
+		"""
+		task.mark_complete()
+		from datetime import timedelta
+		next_time = None
+		if task.frequency == "daily":
+			next_time = task.time + timedelta(days=1)
+		elif task.frequency == "weekly":
+			next_time = task.time + timedelta(weeks=1)
+		if next_time and pet is not None:
+			new_task = Task(
+				description=task.description,
+				time=next_time,
+				frequency=task.frequency,
+				completed=False
+			)
+			pet.add_task(new_task)
 

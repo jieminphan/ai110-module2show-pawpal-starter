@@ -41,3 +41,13 @@ pip install -r requirements.txt
 5. Add tests to verify key behaviors.
 6. Connect your logic to the Streamlit UI in `app.py`.
 7. Refine UML so it matches what you actually built.
+
+## Smarter scheduling
+
+In this project, new scheduling features are as follows:
+1. You can use this for either to schedule medication, feeding or walking times.
+2. Schedule exact dates and times.
+3. Receive reminders for events.
+4. Receive warnings to prevent overlappint of events.
+5. Tasks can be filtered by completion or pet name.
+6. When a daily or weekly task is mark complete, a new one is created automatically for the next occurance.
