@@ -427,7 +427,7 @@ class Scheduler:
 	@staticmethod
 	def organize_tasks_by_time(tasks: list):
 		"""Organize tasks by their scheduled time."""
-		return sorted(tasks, key=lambda t: t.time)
+		return sorted(tasks, key=lambda t: t.time if t.time is not None else datetime.max)
 
 	@staticmethod
 	def mark_task_complete(task: Task, pet: 'PetPlan' = None):

@@ -71,13 +71,31 @@ One tradeoff that the scheduler makes is the schedule for medication will always
 
 **a. What you tested**
 
-- What behaviors did you test?
-- Why were these tests important?
+Using python -m pytest, I ran a series of tests that cover:
+Sorting:
+Sorting with empty task lists.
+Sorting tasks with identical timestamps or priorities.
+Sorting tasks with missing or null fields.
+Sorting tasks with mixed types (e.g., some recurring, some one-time).
+
+Recurring Tasks:
+Recurring tasks that overlap with one-time tasks.
+Recurring tasks that fall on leap days or daylight saving time changes.
+Recurring tasks with invalid or zero intervals.
+Recurring tasks that should end after a certain date or number of occurrences.
+
+General Scheduler:
+Scheduling tasks in the past or far future.
+Tasks with conflicting times (overlaps).
+Tasks with missing required fields (e.g., no pet assigned).
+Handling of duplicate tasks.
+Deleting or editing recurring tasks (does it affect all or just one occurrence?).
+
+Testing these edge cases ensures real-world scenarios can be handled and prevents subtle bugs in scheduling logic. 
 
 **b. Confidence**
 
-- How confident are you that your scheduler works correctly?
-- What edge cases would you test next if you had more time?
+My confidence level would be around 3. There are some features that I haven't had 100% working and am still in the process of testing.
 
 ---
 
@@ -85,12 +103,12 @@ One tradeoff that the scheduler makes is the schedule for medication will always
 
 **a. What went well**
 
-- What part of this project are you most satisfied with?
+- I'm most satisfied with the fact that I managed this built this project using AI as a friend rather than as something to only write my code for me.
 
 **b. What you would improve**
 
-- If you had another iteration, what would you improve or redesign?
+- I would maybe create accessibility features for users and language options.
 
 **c. Key takeaway**
 
-- What is one important thing you learned about designing systems or working with AI on this project?
+- Although AI is extremely helpful, they may not be right 100% of the time, thus fact-checking is very important.

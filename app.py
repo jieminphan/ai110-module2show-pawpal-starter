@@ -56,28 +56,51 @@ st.caption("Add a few tasks. In your final version, these should feed into your 
 
 if "tasks" not in st.session_state:
     st.session_state.tasks = []
+if "task_input_key" not in st.session_state:
+    st.session_state.task_input_key = 0
+
 
 col1, col2, col3 = st.columns(3)
 with col1:
-    task_title = st.text_input("Task title", value="Morning walk")
+    task_title = st.text_input("Task title", key=f"task_title_input_{st.session_state.task_input_key}")
 with col2:
-    duration = st.number_input("Duration (minutes)", min_value=1, max_value=240, value=20)
+    duration = st.number_input("Duration (minutes)", min_value=1, max_value=240, value=20, key="duration_input")
 with col3:
-    priority = st.selectbox("Priority", ["low", "medium", "high"], index=2)
+    priority = st.selectbox("Priority", ["low", "medium", "high"], index=2, key="priority_input")
+
 
 if st.button("Add task"):
     # Use Task class from backend and add to pet
-    new_task = pawpal_system.Task(description=task_title, time=None, frequency="once")
-    st.session_state.pet.add_task(new_task)
-    st.session_state.tasks.append({
-        "title": task_title,
-        "duration_minutes": int(duration),
-        "priority": priority
-    })
+    if task_title.strip():
+        new_task = pawpal_system.Task(description=task_title, time=None, frequency="once")
+        st.session_state.pet.add_task(new_task)
+        st.session_state.tasks.append({
+            "title": task_title,
+            "duration_minutes": int(duration),
+            "priority": priority
+        })
+        # Clear the input by incrementing the key to force a fresh widget
+        st.session_state.task_input_key += 1
+        st.rerun()
 
 if st.session_state.tasks:
-    st.write("Current tasks:")
-    st.table(st.session_state.tasks)
+    # Convert dicts to Task objects for scheduling logic
+    task_objs = [pawpal_system.Task(description=t["title"], time=None, frequency="once") for t in st.session_state.tasks]
+    # Sort tasks using Scheduler
+    sorted_tasks = pawpal_system.Scheduler.organize_tasks_by_time(task_objs)
+    # Check for conflicts
+    conflict_warning = pawpal_system.Scheduler.warn_on_conflicts(sorted_tasks)
+    if conflict_warning:
+        st.warning(conflict_warning)
+    else:
+        st.success("No scheduling conflicts detected.")
+    # Display sorted tasks (as dicts for table)
+    display_tasks = [
+        {"title": t.description, "duration_minutes": st.session_state.tasks[i]["duration_minutes"], "priority": st.session_state.tasks[i]["priority"]}
+        for i, t in enumerate(sorted_tasks)
+    ]
+    st.caption("Sorted tasks for your pet(s):")
+    st.table(display_tasks)
 else:
     st.info("No tasks yet. Add one above.")
 
