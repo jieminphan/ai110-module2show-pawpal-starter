@@ -106,33 +106,33 @@ class Medication(Event):
 
 
 class Database:
-	       def __init__(self, url: str = "sqlite:///pawpal.db"):
-		       """Initialize the database connection and session maker."""
-		       # For sqlite use `check_same_thread=False` to avoid threading errors in apps like Streamlit
-		       connect_args = {"check_same_thread": False} if url.startswith("sqlite:") else {}
-		       self.engine = create_engine(url, echo=False, connect_args=connect_args)
-		       self.Session = sessionmaker(bind=self.engine)
+		def __init__(self, url: str = "sqlite:///pawpal.db"):
+			"""Initialize the database connection and session maker."""
+			# For sqlite use `check_same_thread=False` to avoid threading errors in apps like Streamlit
+			connect_args = {"check_same_thread": False} if url.startswith("sqlite:") else {}
+			self.engine = create_engine(url, echo=False, connect_args=connect_args)
+			self.Session = sessionmaker(bind=self.engine)
 
-	       def create_tables(self) -> None:
-		       """Create all tables in the database."""
-		       Base.metadata.create_all(self.engine)
+		def create_tables(self) -> None:
+			"""Create all tables in the database."""
+			Base.metadata.create_all(self.engine)
 
-	       def get_session(self):
-		       """Get a new database session."""
-		       return self.Session()
+		def get_session(self):
+			"""Get a new database session."""
+			return self.Session()
 
-	       @contextmanager
-	       def session_scope(self):
-		       """Provide a transactional scope around a series of operations."""
-		       session = self.get_session()
-		       try:
-			       yield session
-			       session.commit()
-		       except Exception:
-			       session.rollback()
-			       raise
-		       finally:
-			       session.close()
+		@contextmanager
+		def session_scope(self):
+			"""Provide a transactional scope around a series of operations."""
+			session = self.get_session()
+			try:
+				yield session
+				session.commit()
+			except Exception:
+				session.rollback()
+				raise
+			finally:
+				session.close()
 
 
 # --- Helper CRUD functions (minimal skeleton) ---
@@ -191,21 +191,21 @@ def add_medication(
 	timestamp: Optional[datetime] = None,
 	notes: Optional[str] = None,
 ) -> Medication:
-	       """Add a medication event for a pet."""
-	       evt = Medication(
-		       pet_id=pet_id,
-		       timestamp=timestamp or datetime.utcnow(),
-		       name=name,
-		       dosage=dosage,
-		       start_date=start_date,
-		       end_date=end_date,
-		       schedule=schedule,
-		       notes=notes,
-	       )
-	       session.add(evt)
-	       session.commit()
-	       session.refresh(evt)
-	       return evt
+		"""Add a medication event for a pet."""
+		evt = Medication(
+			pet_id=pet_id,
+			timestamp=timestamp or datetime.utcnow(),
+			name=name,
+			dosage=dosage,
+			start_date=start_date,
+			end_date=end_date,
+			schedule=schedule,
+			notes=notes,
+		)
+		session.add(evt)
+		session.commit()
+		session.refresh(evt)
+		return evt
 
 
 def list_pets_for_owner(session, owner_id: str) -> List[Pet]:
@@ -295,87 +295,87 @@ __all__ = [
 
 # --- Pure Python agent-mode classes (no SQLAlchemy) ---
 class Task:
-	       def __init__(self, description: str, time: datetime, frequency: str = "once", completed: bool = False):
-		       """Initialize a new task."""
-		       self.description = description
-		       self.time = time
-		       self.frequency = frequency
-		       self.completed = completed
+		def __init__(self, description: str, time: datetime, frequency: str = "once", completed: bool = False):
+			"""Initialize a new task."""
+			self.description = description
+			self.time = time
+			self.frequency = frequency
+			self.completed = completed
 
-	       def mark_complete(self):
-		       """Mark this task as complete."""
-		       self.completed = True
+		def mark_complete(self):
+			"""Mark this task as complete."""
+			self.completed = True
 
-	       def __repr__(self):
-		       """Return a string representation of the task."""
-		       return f"<Task desc={self.description!r} time={self.time} freq={self.frequency} completed={self.completed}>"
+		def __repr__(self):
+			"""Return a string representation of the task."""
+			return f"<Task desc={self.description!r} time={self.time} freq={self.frequency} completed={self.completed}>"
 
 
 class Pet:
-	       def __init__(self, name, species=None, breed=None, birth_date=None, notes=None, tasks=None):
-		       """Initialize a new pet."""
-		       self.name = name
-		       self.species = species
-		       self.breed = breed
-		       self.birth_date = birth_date
-		       self.notes = notes
-		       self.tasks = tasks if tasks is not None else []
+		def __init__(self, name, species=None, breed=None, birth_date=None, notes=None, tasks=None):
+			"""Initialize a new pet."""
+			self.name = name
+			self.species = species
+			self.breed = breed
+			self.birth_date = birth_date
+			self.notes = notes
+			self.tasks = tasks if tasks is not None else []
 
-	       def add_task(self, task: Task):
-		       """Add a task to this pet."""
-		       self.tasks.append(task)
+		def add_task(self, task: Task):
+			"""Add a task to this pet."""
+			self.tasks.append(task)
 
-	       def get_tasks(self):
-		       """Get all tasks for this pet."""
-		       return self.tasks
+		def get_tasks(self):
+			"""Get all tasks for this pet."""
+			return self.tasks
 
-	       def __repr__(self):
-		       """Return a string representation of the pet."""
-		       return f"<Pet name={self.name!r} species={self.species} tasks={len(self.tasks)} >"
+		def __repr__(self):
+			"""Return a string representation of the pet."""
+			return f"<Pet name={self.name!r} species={self.species} tasks={len(self.tasks)} >"
 
 
 class Owner:
-	       def __init__(self, name, email=None, phone=None, pets=None):
-		       """Initialize a new owner."""
-		       self.name = name
-		       self.email = email
-		       self.phone = phone
-		       self.pets = pets if pets is not None else []
+		def __init__(self, name, email=None, phone=None, pets=None):
+			"""Initialize a new owner."""
+			self.name = name
+			self.email = email
+			self.phone = phone
+			self.pets = pets if pets is not None else []
 
-	       def add_pet(self, pet: Pet):
-		       """Add a pet to this owner."""
-		       self.pets.append(pet)
+		def add_pet(self, pet: Pet):
+			"""Add a pet to this owner."""
+			self.pets.append(pet)
 
-	       def get_all_tasks(self):
-		       """Get all tasks for all pets owned by this owner."""
-		       all_tasks = []
-		       for pet in self.pets:
-			       all_tasks.extend(getattr(pet, 'tasks', []))
-		       return all_tasks
+		def get_all_tasks(self):
+			"""Get all tasks for all pets owned by this owner."""
+			all_tasks = []
+			for pet in self.pets:
+				all_tasks.extend(getattr(pet, 'tasks', []))
+			return all_tasks
 
-	       def __repr__(self):
-		       """Return a string representation of the owner."""
-		       return f"<Owner name={self.name!r} pets={len(self.pets)} >"
+		def __repr__(self):
+			"""Return a string representation of the owner."""
+			return f"<Owner name={self.name!r} pets={len(self.pets)} >"
 
 
 class Scheduler:
-	       @staticmethod
-	       def get_all_tasks_for_owner(owner: Owner):
-		       """Get all tasks for a given owner."""
-		       return owner.get_all_tasks()
+		@staticmethod
+		def get_all_tasks_for_owner(owner: Owner):
+			"""Get all tasks for a given owner."""
+			return owner.get_all_tasks()
 
-	       @staticmethod
-	       def get_tasks_for_pet(pet: Pet):
-		       """Get all tasks for a given pet."""
-		       return pet.get_tasks()
+		@staticmethod
+		def get_tasks_for_pet(pet: Pet):
+			"""Get all tasks for a given pet."""
+			return pet.get_tasks()
 
-	       @staticmethod
-	       def organize_tasks_by_time(tasks: list):
-		       """Organize tasks by their scheduled time."""
-		       return sorted(tasks, key=lambda t: t.time)
+		@staticmethod
+		def organize_tasks_by_time(tasks: list):
+			"""Organize tasks by their scheduled time."""
+			return sorted(tasks, key=lambda t: t.time)
 
-	       @staticmethod
-	       def mark_task_complete(task: Task):
-		       """Mark a given task as complete."""
-		       task.mark_complete()
+		@staticmethod
+		def mark_task_complete(task: Task):
+			"""Mark a given task as complete."""
+			task.mark_complete()
 

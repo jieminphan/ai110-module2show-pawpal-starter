@@ -6,11 +6,38 @@
 
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
+My UML design includes classes "Pet", "Event", "Feeding", "Walk", and "Medication".
+
+Pet:
+- String name
+- String species
+- String breed
+- Date brithDate
+- String notes
+
+Event:
+- Int id
+- DateTime timestamp
+- String notes
+- addFeeding()
+- addWalk()
+- addMedication()
+
+Feeding:
+- String foodName
+- String amount
+
+Walk:
+- int durationWalked
+- float distance
+
+Medication:
+- String name
+- String dosage
 
 **b. Design changes**
 
-- Did your design change during implementation?
-- If yes, describe at least one change and why you made it.
+Yes. I added "Scheduled doses" under "Medication" as it is important for medication to be taken on time for the pets, whether it is chronic or minor.
 
 ---
 
@@ -18,13 +45,11 @@
 
 **a. Constraints and priorities**
 
-- What constraints does your scheduler consider (for example: time, priority, preferences)?
-- How did you decide which constraints mattered most?
+Some constraints that my scheduler consider are medication, time windows, recurring schedules, task duration, and other preferences. I decided what mattered more based on safety, feasibility and user impact. For example, medication is at the top of the list as it may cause a life or death situation if a dose was missed, or even just by being late. When feasible, the pet owners may choose their own schedules (like walking times etc) but medication will always take priority.
 
 **b. Tradeoffs**
 
-- Describe one tradeoff your scheduler makes.
-- Why is that tradeoff reasonable for this scenario?
+One tradeoff that the scheduler makes is the schedule for medication will always overwrite other schedules, unless it is important for the medications (eg food must be eaten before taken medication). This tradeoff is reasonable as it concerns the health of the pet, by prioritizing medications, it prevents high-risk incidents from taking place even if it might inconvenience the owner.
 
 ---
 
