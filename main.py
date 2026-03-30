@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from pawpal_system import Owner, Pet, Task, Scheduler
+from pawpal_system import OwnerPlan as Owner, PetPlan as Pet, Task, Scheduler
 
 # Create an owner
 owner = Owner(name="Alex Kim", email="alex@example.com", phone="555-1234")

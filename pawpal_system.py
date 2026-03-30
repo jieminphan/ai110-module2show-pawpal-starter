@@ -17,6 +17,7 @@ from sqlalchemy import (
 	create_engine,
 )
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
+from sqlalchemy.exc import PendingRollbackError
 from contextlib import contextmanager
 
 Base = declarative_base()
@@ -128,6 +129,8 @@ class Database:
 			try:
 				yield session
 				session.commit()
+			except PendingRollbackError:
+				session.rollback()
 			except Exception:
 				session.rollback()
 				raise
@@ -311,7 +314,7 @@ class Task:
 		return f"<Task desc={self.description!r} time={self.time} freq={self.frequency} completed={self.completed}>"
 
 
-class Pet:
+class PetPlan:
 	def __init__(self, name, species=None, breed=None, birth_date=None, notes=None, tasks=None):
 		"""Initialize a new pet."""
 		self.name = name
@@ -331,10 +334,10 @@ class Pet:
 
 	def __repr__(self):
 		"""Return a string representation of the pet."""
-		return f"<Pet name={self.name!r} species={self.species} tasks={len(self.tasks)} >"
+		return f"<PetPlan name={self.name!r} species={self.species} tasks={len(self.tasks)} >"
 
 
-class Owner:
+class OwnerPlan:
 	def __init__(self, name, email=None, phone=None, pets=None):
 		"""Initialize a new owner."""
 		self.name = name
@@ -342,7 +345,7 @@ class Owner:
 		self.phone = phone
 		self.pets = pets if pets is not None else []
 
-	def add_pet(self, pet: Pet):
+	def add_pet(self, pet: PetPlan):
 		"""Add a pet to this owner."""
 		self.pets.append(pet)
 
@@ -355,7 +358,7 @@ class Owner:
 
 	def __repr__(self):
 		"""Return a string representation of the owner."""
-		return f"<Owner name={self.name!r} pets={len(self.pets)} >"
+		return f"<OwnerPlan name={self.name!r} pets={len(self.pets)} >"
 
 
 class Scheduler:
@@ -412,12 +415,12 @@ class Scheduler:
 		return filtered
 
 	@staticmethod
-	def get_all_tasks_for_owner(owner: Owner):
+	def get_all_tasks_for_owner(owner: OwnerPlan):
 		"""Get all tasks for a given owner."""
 		return owner.get_all_tasks()
 
 	@staticmethod
-	def get_tasks_for_pet(pet: Pet):
+	def get_tasks_for_pet(pet: PetPlan):
 		"""Get all tasks for a given pet."""
 		return pet.get_tasks()
 
@@ -427,7 +430,7 @@ class Scheduler:
 		return sorted(tasks, key=lambda t: t.time)
 
 	@staticmethod
-	def mark_task_complete(task: Task, pet: 'Pet' = None):
+	def mark_task_complete(task: Task, pet: 'PetPlan' = None):
 		"""
 		Mark a given task as complete. If the task is 'daily' or 'weekly', create the next occurrence automatically.
 		:param task: The Task to mark complete

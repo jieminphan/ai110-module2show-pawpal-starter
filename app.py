@@ -1,5 +1,5 @@
 import streamlit as st
-import pawpal_system.py as pawpal_system
+import pawpal_system
 
 st.set_page_config(page_title="PawPal+", page_icon="🐾", layout="centered")
 
@@ -46,9 +46,9 @@ species = st.selectbox("Species", ["dog", "cat", "other"])
 
 # Add pet using backend logic and store in session state
 if "owner" not in st.session_state:
-    st.session_state.owner = pawpal_system.Owner(name=owner_name)
+    st.session_state.owner = pawpal_system.OwnerPlan(name=owner_name)
 if "pet" not in st.session_state or st.session_state.pet.name != pet_name:
-    st.session_state.pet = pawpal_system.Pet(name=pet_name, species=species)
+    st.session_state.pet = pawpal_system.PetPlan(name=pet_name, species=species)
     st.session_state.owner.add_pet(st.session_state.pet)
 
 st.markdown("### Tasks")

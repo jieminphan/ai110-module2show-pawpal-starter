@@ -51,3 +51,24 @@ In this project, new scheduling features are as follows:
 4. Receive warnings to prevent overlappint of events.
 5. Tasks can be filtered by completion or pet name.
 6. When a daily or weekly task is mark complete, a new one is created automatically for the next occurance.
+
+## Testing PawPal+
+Using python -m pytest, I ran a series of tests that cover:
+Sorting:
+Sorting with empty task lists.
+Sorting tasks with identical timestamps or priorities.
+Sorting tasks with missing or null fields.
+Sorting tasks with mixed types (e.g., some recurring, some one-time).
+
+Recurring Tasks:
+Recurring tasks that overlap with one-time tasks.
+Recurring tasks that fall on leap days or daylight saving time changes.
+Recurring tasks with invalid or zero intervals.
+Recurring tasks that should end after a certain date or number of occurrences.
+
+General Scheduler:
+Scheduling tasks in the past or far future.
+Tasks with conflicting times (overlaps).
+Tasks with missing required fields (e.g., no pet assigned).
+Handling of duplicate tasks.
+Deleting or editing recurring tasks (does it affect all or just one occurrence?).
